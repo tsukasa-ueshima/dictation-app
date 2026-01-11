@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dictation Master</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -14,6 +14,7 @@
             height: 100vh;
             overflow: hidden;
             user-select: none;
+            touch-action: manipulation;
         }
 
         .mono {
@@ -109,46 +110,47 @@
             margin-bottom: 1rem;
         }
 
-        .review-list::-webkit-scrollbar {
-            width: 6px;
-        }
-        .review-list::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        .review-list::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 10px;
+        #hiddenInput {
+            position: absolute;
+            top: -100px;
+            left: 0;
+            opacity: 0;
+            font-size: 16px;
+            width: 1px;
+            height: 1px;
         }
     </style>
 </head>
 <body class="flex items-center justify-center">
 
-    <div id="app" class="w-full max-w-2xl bg-white shadow-2xl rounded-3xl overflow-hidden relative">
+    <div id="app" class="w-full max-w-2xl bg-white shadow-2xl rounded-3xl overflow-hidden relative mx-2">
         
         <div id="successOverlay" class="correct-overlay">
             <div class="correct-circle"></div>
         </div>
 
+        <input type="text" id="hiddenInput" autocomplete="off" autocapitalize="off" spellcheck="false">
+
         <!-- 1. スタート画面 -->
-        <div id="screenStart" class="p-12 text-center fade-in">
-            <h1 class="text-4xl font-bold text-blue-600 mb-4">Dictation Master</h1>
+        <div id="screenStart" class="p-8 md:p-12 text-center fade-in">
+            <h1 class="text-3xl md:text-4xl font-bold text-blue-600 mb-4">Dictation Master</h1>
             <p class="text-gray-600 mb-8">難易度を選んで挑戦！<br>最高ランクを目指しましょう。</p>
             
             <div class="flex flex-col gap-4 max-w-xs mx-auto">
-                <button onclick="game.start('junior')" class="bg-green-500 hover:bg-green-600 text-white text-xl font-bold py-4 px-8 rounded-2xl transition transform hover:scale-105 shadow-md">
+                <button onclick="game.start('junior')" class="bg-green-500 hover:bg-green-600 text-white text-xl font-bold py-4 px-8 rounded-2xl transition transform active:scale-95 shadow-md">
                     中学生レベル
                 </button>
-                <button onclick="game.start('senior')" class="bg-orange-500 hover:bg-orange-600 text-white text-xl font-bold py-4 px-8 rounded-2xl transition transform hover:scale-105 shadow-md">
+                <button onclick="game.start('senior')" class="bg-orange-500 hover:bg-orange-600 text-white text-xl font-bold py-4 px-8 rounded-2xl transition transform active:scale-95 shadow-md">
                     高校生レベル
                 </button>
-                <button onclick="game.start('toeic')" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xl font-bold py-4 px-8 rounded-2xl transition transform hover:scale-105 shadow-md">
+                <button onclick="game.start('toeic')" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xl font-bold py-4 px-8 rounded-2xl transition transform active:scale-95 shadow-md">
                     TOEIC対策
                 </button>
             </div>
         </div>
 
         <!-- 2. メインプレイ画面 -->
-        <div id="screenPlay" class="hidden p-8 fade-in flex flex-col h-[550px]">
+        <div id="screenPlay" class="hidden p-6 md:p-8 fade-in flex flex-col h-[550px]">
             <div class="flex justify-between items-center mb-6">
                 <div class="flex flex-col">
                     <div id="levelBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full w-fit mb-1 uppercase tracking-tighter">LEVEL</div>
@@ -160,14 +162,14 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
                     </svg>
-                    もう一度聴く
+                    聴く
                 </button>
             </div>
 
-            <div class="bg-slate-50 border-2 border-slate-100 rounded-2xl p-8 mb-4 text-center flex-grow flex flex-col items-center justify-center gap-6 overflow-hidden">
-                <div id="sentenceDisplay" class="text-2xl mono leading-relaxed tracking-wider select-none flex flex-wrap justify-center gap-y-4">
+            <div class="bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 md:p-8 mb-4 text-center flex-grow flex flex-col items-center justify-center gap-6 overflow-hidden" onclick="game.focusInput()">
+                <div id="sentenceDisplay" class="text-xl md:text-2xl mono leading-relaxed tracking-wider select-none flex flex-wrap justify-center gap-y-4">
                 </div>
-                <div id="translationDisplay" class="opacity-0 transform translate-y-2 text-lg font-bold text-blue-600 border-t border-slate-200 pt-6 w-full">
+                <div id="translationDisplay" class="opacity-0 transform translate-y-2 text-base md:text-lg font-bold text-blue-600 border-t border-slate-200 pt-6 w-full">
                 </div>
             </div>
 
@@ -175,21 +177,21 @@
                 <button id="hintBtn" onclick="game.useHint()" class="bg-orange-100 hover:bg-orange-200 text-orange-600 font-bold py-3 px-8 rounded-xl transition flex items-center gap-2">
                     <span>💡 1文字ヒント</span>
                 </button>
-                <p class="text-xs text-gray-400 italic">キーボードからアルファベットを入力してください</p>
+                <p class="text-[10px] text-gray-400 italic">キーボードでアルファベットを入力してください</p>
             </div>
         </div>
 
         <!-- 3. リザルト画面 -->
-        <div id="screenResult" class="hidden p-8 text-center fade-in">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">結果発表</h2>
+        <div id="screenResult" class="hidden p-6 md:p-8 text-center fade-in">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">結果発表</h2>
             
-            <div id="rankContainer" class="mb-4 flex flex-col items-center justify-center min-h-[220px]">
+            <div id="rankContainer" class="mb-4 flex flex-col items-center justify-center min-h-[200px]">
                 <div id="rankIllustration" class="illustration-container"></div>
-                <div id="rankLabel" class="font-black italic tracking-tighter text-6xl">Sランク</div>
-                <div id="rankMessage" class="text-lg font-bold text-gray-500 mt-2">素晴らしいリスニング力です！</div>
+                <div id="rankLabel" class="font-black italic tracking-tighter text-5xl md:text-6xl">Sランク</div>
+                <div id="rankMessage" class="text-base md:text-lg font-bold text-gray-500 mt-2">素晴らしいリスニング力です！</div>
             </div>
 
-            <div class="bg-gray-50 rounded-2xl p-6 mb-8 inline-block min-w-[320px] text-left border border-gray-100">
+            <div class="bg-gray-50 rounded-2xl p-6 mb-8 inline-block w-full max-w-sm text-left border border-gray-100">
                 <div class="flex justify-between mb-2 text-sm">
                     <span class="text-gray-500">ミスタイプ回数</span>
                     <span id="statMiss" class="font-bold text-gray-800">0 回</span>
@@ -207,10 +209,10 @@
 
             <div class="flex flex-col gap-3 items-center">
                 <div class="flex gap-4 justify-center w-full">
-                    <button onclick="game.start(game.currentLevel)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-2xl transition shadow-lg transform hover:-translate-y-1 flex-1">
+                    <button onclick="game.start(game.currentLevel)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-2xl transition shadow-lg flex-1 transform active:scale-95">
                         もう一度
                     </button>
-                    <button onclick="game.showReview()" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-2xl transition shadow-lg transform hover:-translate-y-1 flex-1">
+                    <button onclick="game.showReview()" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-2xl transition shadow-lg flex-1 transform active:scale-95">
                         問題を振り返る
                     </button>
                 </div>
@@ -221,16 +223,16 @@
         </div>
 
         <!-- 4. 振り返り画面 -->
-        <div id="screenReview" class="hidden p-8 fade-in flex flex-col h-[550px]">
+        <div id="screenReview" class="hidden p-6 md:p-8 fade-in flex flex-col h-[550px]">
             <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">今回の問題</h2>
             <div id="reviewList" class="flex-grow overflow-y-auto space-y-4 pr-2 mb-6 review-list">
             </div>
             <div class="flex flex-col gap-3 items-center mt-auto">
                 <div class="flex gap-4 justify-center w-full">
-                    <button onclick="game.start(game.currentLevel)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-2xl transition shadow-lg transform hover:-translate-y-1 flex-1">
+                    <button onclick="game.start(game.currentLevel)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-2xl transition shadow-lg flex-1 transform active:scale-95">
                         もう一度
                     </button>
-                    <button onclick="game.showScreen('screenResult')" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 px-8 rounded-2xl transition flex-1">
+                    <button onclick="game.showScreen('screenResult')" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 px-8 rounded-2xl transition flex-1 transform active:scale-95">
                         結果に戻る
                     </button>
                 </div>
@@ -241,11 +243,9 @@
         </div>
     </div>
 
-    <input type="text" id="hiddenInput" class="opacity-0 absolute -z-10" autocomplete="off" autogrow="off">
-
     <script>
         const MASTER_DATA = {
-            junior: [
+             junior: [
                 { en: "I have a pen.", ja: "私はペンを持っています。" },
                 { en: "The apple is red.", ja: "そのリンゴは赤いです。" },
                 { en: "Where is the station?", ja: "駅はどこですか？" },
@@ -564,6 +564,15 @@
         const audioManager = {
             ctx: new (window.AudioContext || window.webkitAudioContext)(),
             bgmNode: null,
+            englishVoice: null,
+
+            initVoices() {
+                // 音声リストを取得し、英語ボイスを特定する
+                const voices = window.speechSynthesis.getVoices();
+                // iPhone等で高品質なボイス（Samanthaなど）があれば優先する
+                this.englishVoice = voices.find(v => v.lang.startsWith('en-') && v.name.includes('Samantha')) || 
+                                    voices.find(v => v.lang.startsWith('en-'));
+            },
 
             playPingPong() {
                 this.beep(660, 0.1);
@@ -596,6 +605,12 @@
             speak(text, lang = 'en-US', callback = null) {
                 window.speechSynthesis.cancel();
                 const uttr = new SpeechSynthesisUtterance(text);
+                
+                if (lang.startsWith('en-')) {
+                    if (!this.englishVoice) this.initVoices(); // 未取得なら再試行
+                    if (this.englishVoice) uttr.voice = this.englishVoice;
+                }
+                
                 uttr.lang = lang;
                 uttr.rate = 0.85;
                 if (callback) { uttr.onend = callback; }
@@ -656,6 +671,11 @@
             }
         };
 
+        // iPhone対策：音声リストのロード待ち
+        window.speechSynthesis.onvoiceschanged = () => {
+            audioManager.initVoices();
+        };
+
         const game = {
             status: 'start',
             currentIndex: 0,
@@ -680,6 +700,9 @@
             },
 
             start(level) {
+                // iOS対策：ユーザーのアクション内で音声を初期化
+                audioManager.initVoices();
+                
                 this.currentLevel = level;
                 this.currentIndex = 0;
                 this.mistakes = 0;
@@ -696,20 +719,26 @@
                 this.updateUIForLevel();
                 this.loadQuestion();
                 this.showScreen('screenPlay');
-                document.getElementById('hiddenInput').focus();
+                this.focusInput();
+            },
+
+            focusInput() {
+                const input = document.getElementById('hiddenInput');
+                input.focus();
+                if (input.setSelectionRange) input.setSelectionRange(0, 0);
             },
 
             updateUIForLevel() {
                 const badge = document.getElementById('levelBadge');
                 if (this.currentLevel === 'junior') {
                     badge.innerText = '中学生レベル';
-                    badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-100 text-green-600 w-fit mb-1';
+                    badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-100 text-green-600 w-fit mb-1 uppercase tracking-tighter';
                 } else if (this.currentLevel === 'senior') {
                     badge.innerText = '高校生レベル';
-                    badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-600 w-fit mb-1';
+                    badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-600 w-fit mb-1 uppercase tracking-tighter';
                 } else {
                     badge.innerText = 'TOEIC対策';
-                    badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-600 w-fit mb-1';
+                    badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-600 w-fit mb-1 uppercase tracking-tighter';
                 }
             },
 
@@ -802,7 +831,6 @@
                             return; 
                         }
                     }
-                    
                     this.mistakes++;
                     this.questionMistakes[this.currentIndex]++;
                     audioManager.playBuzz();
@@ -818,6 +846,7 @@
                 this.currentSentenceData[nextTargetIdx].state = 'hint';
                 this.render();
                 this.checkCompletion();
+                this.focusInput();
             },
 
             checkCompletion() {
@@ -843,6 +872,7 @@
                 if (this.currentIndex < 5) {
                     this.status = 'playing';
                     this.loadQuestion();
+                    this.focusInput();
                 } else {
                     this.finishGame();
                 }
@@ -857,41 +887,20 @@
             finishGame() {
                 this.status = 'result';
                 const score = Math.max(0, 100 - (this.mistakes * 2) - (this.hintsUsed * 5));
-                
-                let rank = 'C';
-                let message = 'もう少し頑張りましょう！';
-                let bgmType = 'sad';
-                let colorClass = 'text-gray-400';
-
-                if (score >= 90) {
-                    rank = 'S';
-                    message = 'Excellent! 完璧です！';
-                    bgmType = 'happy';
-                    colorClass = 'text-yellow-500';
-                    document.getElementById('rankLabel').classList.add('rank-bounce');
-                } else if (score >= 70) {
-                    rank = 'A';
-                    message = 'Great! かなり聞き取れています！';
-                    bgmType = 'happy';
-                    colorClass = 'text-green-500';
-                } else if (score >= 50) {
-                    rank = 'B';
-                    message = 'Good! あと少しで完璧です。';
-                    bgmType = 'sad';
-                    colorClass = 'text-blue-500';
-                }
+                let rank = 'C', message = 'もう少し頑張りましょう！', bgmType = 'sad', colorClass = 'text-gray-400';
+                if (score >= 90) { rank = 'S'; message = 'Excellent! 完璧です！'; bgmType = 'happy'; colorClass = 'text-yellow-500'; } 
+                else if (score >= 70) { rank = 'A'; message = 'Great! かなり聞き取れています！'; bgmType = 'happy'; colorClass = 'text-green-500'; } 
+                else if (score >= 50) { rank = 'B'; message = 'Good! あと少しで完璧です。'; bgmType = 'sad'; colorClass = 'text-blue-500'; }
 
                 const label = document.getElementById('rankLabel');
                 label.innerText = `${rank}ランク`;
                 label.className = `font-black italic tracking-tighter transition-all duration-500 ${colorClass} text-6xl`;
                 if (rank === 'S') label.classList.add('rank-bounce');
-                
                 document.getElementById('rankIllustration').innerHTML = ILLUSTS[rank];
                 document.getElementById('rankMessage').innerText = message;
                 document.getElementById('statMiss').innerText = `${this.mistakes} 回`;
                 document.getElementById('statHint').innerText = `${this.hintsUsed} 回`;
                 document.getElementById('statScore').innerText = score;
-                
                 this.showScreen('screenResult');
                 audioManager.startResultBGM(bgmType);
             },
@@ -904,10 +913,8 @@
                     const hCount = this.questionHints[i];
                     const item = document.createElement('div');
                     item.className = 'bg-slate-50 border border-slate-200 p-4 rounded-xl flex justify-between items-center group';
-                    
                     const mistakeColor = mCount > 0 ? 'text-red-500 border-red-100' : 'text-green-500 border-green-100';
                     const hintColor = hCount > 0 ? 'text-red-500 border-red-100' : 'text-slate-400 border-slate-100';
-
                     item.innerHTML = `
                         <div class="flex-grow">
                             <div class="flex flex-wrap items-center gap-2 mb-1">
@@ -919,9 +926,7 @@
                             <div class="text-sm text-blue-500 font-bold">${q.ja}</div>
                         </div>
                         <button onclick="audioManager.speak('${q.en.replace(/'/g, "\\'")}', 'en-US')" class="ml-4 p-2 bg-white border border-slate-200 rounded-full hover:bg-blue-50 hover:border-blue-200 transition text-blue-500 shadow-sm self-start mt-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H3a1 1 0 01-1-1V8a1 1 0 011-1h1.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.983 5.983 0 01-1.414 4.243 1 1 0 11-1.415-1.415A3.983 3.983 0 0013 10a3.983 3.983 0 00-1.071-2.757 1 1 0 010-1.415z" clip-rule="evenodd" />
-                            </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H3a1 1 0 01-1-1V8a1 1 0 011-1h1.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.983 5.983 0 01-1.414 4.243 1 1 0 11-1.415-1.415A3.983 3.983 0 0013 10a3.983 3.983 0 00-1.071-2.757 1 1 0 010-1.415z" clip-rule="evenodd" /></svg>
                         </button>
                     `;
                     list.appendChild(item);
@@ -930,18 +935,32 @@
             },
 
             showScreen(id) {
-                ['screenStart', 'screenPlay', 'screenResult', 'screenReview'].forEach(s => {
-                    document.getElementById(s).classList.add('hidden');
-                });
+                ['screenStart', 'screenPlay', 'screenResult', 'screenReview'].forEach(s => document.getElementById(s).classList.add('hidden'));
                 document.getElementById(id).classList.remove('hidden');
             }
         };
 
+        const hiddenInput = document.getElementById('hiddenInput');
+        hiddenInput.addEventListener('input', (e) => {
+            const val = e.target.value;
+            if (val.length > 0) {
+                const char = val.slice(-1);
+                if (/[a-zA-Z]/.test(char)) game.handleInput(char);
+                e.target.value = '';
+            }
+        });
+
         window.addEventListener('keydown', (e) => {
             if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) game.handleInput(e.key);
         });
-        document.addEventListener('click', () => { if (game.status === 'playing') document.getElementById('hiddenInput').focus(); });
-        window.onload = () => game.init();
+
+        document.addEventListener('click', () => { 
+            if (game.status === 'playing') game.focusInput();
+        });
+
+        window.onload = () => {
+            game.init();
+        };
     </script>
 </body>
 </html>
