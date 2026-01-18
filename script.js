@@ -298,6 +298,7 @@ const game = {
     currentLevel: '',
     questionMistakes: [0, 0, 0, 0, 0], 
     questionHints: [0, 0, 0, 0, 0],
+    questionMistakeIndices: [],
     isProcessingInput: false, 
 
     init() {
@@ -315,6 +316,7 @@ const game = {
         this.hintsUsed = 0;
         this.questionMistakes = [0, 0, 0, 0, 0];
         this.questionHints = [0, 0, 0, 0, 0];
+        this.questionMistakeIndices = Array.from({ length: 5 }, () => new Set());
         
         const pool = MASTER_DATA[level];
         this.selectedQuestions = [...pool].sort(() => Math.random() - 0.5).slice(0, 5);
@@ -464,6 +466,12 @@ const game = {
             }
             this.mistakes++;
             this.questionMistakes[this.currentIndex]++;
+            if (this.currentSentenceData[nextTargetIdx]) {
+                this.currentSentenceData[nextTargetIdx].mistake = true;
+            }
+            if (this.questionMistakeIndices[this.currentIndex]) {
+                this.questionMistakeIndices[this.currentIndex].add(nextTargetIdx);
+            }
             audioManager.playBuzz();
         }
 
@@ -488,6 +496,7 @@ const game = {
             this.status = 'cleared';
             audioManager.playPingPong();
             this.showClearEffect();
+            this.captureMistakesForCurrentQuestion();
             const transArea = document.getElementById('translationDisplay');
             if (transArea) {
                 transArea.style.opacity = '1';
@@ -562,6 +571,8 @@ const game = {
         this.selectedQuestions.forEach((q, i) => {
             const mCount = this.questionMistakes[i];
             const hCount = this.questionHints[i];
+            const mistakeSet = this.questionMistakeIndices[i];
+            const sentenceHtml = this.formatReviewSentence(q.en, mistakeSet);
             const mistakeColor = mCount > 0 ? 'text-red-500 border-red-100' : 'text-green-500 border-green-100';
             const hintColor = hCount > 0 ? 'text-red-500 border-red-100' : 'text-slate-400 border-slate-100';
             const item = document.createElement('div');
@@ -573,7 +584,7 @@ const game = {
                         <span class="text-[10px] font-bold ${mistakeColor} bg-white border px-2 py-0.5 rounded-full shadow-sm">ミス: ${mCount}</span>
                         <span class="text-[10px] font-bold ${hintColor} bg-white border px-2 py-0.5 rounded-full shadow-sm">ヒント: ${hCount}</span>
                     </div>
-                    <div class="text-lg font-bold text-gray-800 leading-tight mb-1">${q.en}</div>
+                    <div class="text-lg font-bold text-gray-800 leading-tight mb-1">${sentenceHtml}</div>
                     <div class="text-sm text-blue-500 font-bold">${q.ja}</div>
                 </div>
                 <button type="button" onclick="audioManager.speak('${q.en.replace(/'/g, "\\'")}', 'en-US')" class="ml-4 p-2 bg-white border border-slate-200 rounded-full text-blue-500 shadow-sm self-start mt-2 active:bg-blue-50">
@@ -583,6 +594,31 @@ const game = {
             list.appendChild(item);
         });
         this.showScreen('screenReview');
+    },
+
+    captureMistakesForCurrentQuestion() {
+        const mistakeSet = new Set();
+        this.currentSentenceData.forEach((item, idx) => {
+            if (item.mistake) mistakeSet.add(idx);
+        });
+        this.questionMistakeIndices[this.currentIndex] = mistakeSet;
+    },
+
+    formatReviewSentence(sentence, mistakeSet) {
+        const escapeHtml = (value) => value.replace(/[&<>"']/g, (char) => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        })[char]);
+        return Array.from(sentence).map((char, idx) => {
+            const safe = escapeHtml(char);
+            if (mistakeSet && mistakeSet.has(idx)) {
+                return `<span class="review-miss">${safe}</span>`;
+            }
+            return safe;
+        }).join('');
     },
 
     showScreen(id) {
