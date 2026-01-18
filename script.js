@@ -125,10 +125,10 @@ const MASTER_DATA = {
 };
 
 const EVALUATIONS = {
-    S: { title: "ネイティブ級エリート", message: "耳が英語モード全開！完璧なリスニング能力です。", icon: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 15l-3-7 7 2 3-7 3 7 7-2-3 7H5zm14 2H5v2h14v-2z" fill="#EAB308"/></svg>` },
-    A: { title: "流暢なイングリッシュスピーカー", message: "素晴らしい精度！ネイティブとの会話も余裕のレベルです。", icon: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="8" fill="#94A3B8"/><path d="M12 7l1.5 3h3.5l-2.5 2 1 3.5-3.5-2-3.5 2 1-3.5-2.5-2h3.5L12 7z" fill="#F8FAFC"/></svg>` },
-    B: { title: "期待のバイリンガル候補", message: "基本はバッチリ。あと少しの慣れで飛躍的に伸びます！", icon: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#3B82F6"/></svg>` },
-    C: { title: "伸びしろ満載のチャレンジャー", message: "今は耳を鳴らす時期。継続すれば必ず聴き取れるようになります！", icon: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" fill="#94A3B8"/></svg>` }
+    S: { title: "神耳", message: "耳が英語モード全開！完璧なリスニング能力です。", icon: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 15l-3-7 7 2 3-7 3 7 7-2-3 7H5zm14 2H5v2h14v-2z" fill="#EAB308"/></svg>` },
+    A: { title: "英耳マスター", message: "素晴らしい精度！ネイティブとの会話も余裕のレベルです。", icon: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="8" fill="#94A3B8"/><path d="M12 7l1.5 3h3.5l-2.5 2 1 3.5-3.5-2-3.5 2 1-3.5-2.5-2h3.5L12 7z" fill="#F8FAFC"/></svg>` },
+    B: { title: "耳トレ上級", message: "基本はバッチリ。あと少しの慣れで飛躍的に伸びます！", icon: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#3B82F6"/></svg>` },
+    C: { title: "伸びしろ∞", message: "今は耳を鳴らす時期。継続すれば必ず聴き取れるようになります！", icon: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" fill="#94A3B8"/></svg>` }
 };
 
 // --- オーディオ管理 ---
