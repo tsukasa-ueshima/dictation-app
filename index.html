@@ -111,23 +111,40 @@
             -webkit-tap-highlight-color: transparent;
             user-select: none;
         }
+
+        #imeWarning {
+            position: absolute;
+            top: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #ef4444;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 50;
+            display: none;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
     </style>
 </head>
 <body>
 
     <div id="app" class="w-full max-w-2xl bg-white shadow-2xl rounded-3xl overflow-hidden relative mx-2">
         
+        <div id="imeWarning">⚠️ 英数入力に切り替えてください</div>
+
         <div id="successOverlay" class="correct-overlay">
             <div class="correct-circle"></div>
         </div>
 
-        <!-- 隠しインプット: inputmode="email" で予測変換バッファを抑制 -->
-        <input type="text" id="hiddenInput" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="email">
+        <input type="password" id="hiddenInput" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="email">
 
         <!-- 1. スタート画面 -->
         <div id="screenStart" class="p-8 md:p-12 text-center fade-in">
             <h1 class="text-3xl md:text-4xl font-bold text-blue-600 mb-4">Dictation Master</h1>
-            <p class="text-gray-600 mb-8">難易度を選んで挑戦！<br>最高ランクを目指しましょう。</p>
+            <p class="text-gray-600 mb-10">聴き取って、打ち込め。<br>あなたの今の英語力を診断します。</p>
             
             <div class="flex flex-col gap-4 max-w-xs mx-auto">
                 <button type="button" onclick="game.start('junior')" class="bg-green-500 hover:bg-green-600 text-white text-xl font-bold py-4 px-8 rounded-2xl transition transform active:scale-95 shadow-md">
@@ -156,6 +173,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
                     </svg>
                     聴く
+                    <span class="text-[10px] font-bold text-blue-400 border border-blue-200 rounded px-1 py-0.5 leading-none">SPACE</span>
                 </button>
             </div>
 
@@ -176,26 +194,27 @@
 
         <!-- 3. リザルト画面 -->
         <div id="screenResult" class="hidden p-6 md:p-8 text-center fade-in">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">結果発表</h2>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">診断結果</h2>
+            <p class="text-xs text-gray-400 mb-4 uppercase tracking-widest">English Proficiency Report</p>
             
             <div id="rankContainer" class="mb-4 flex flex-col items-center justify-center min-h-[220px]">
                 <div id="rankIllustration" class="illustration-container"></div>
-                <div id="rankLabel" class="font-black italic tracking-tighter text-5xl md:text-6xl">Sランク</div>
-                <div id="rankMessage" class="text-base md:text-lg font-bold text-gray-500 mt-2">素晴らしいリスニング力です！</div>
+                <div id="rankLabel" class="font-black tracking-tighter text-3xl md:text-4xl leading-tight">診断中...</div>
+                <div id="rankMessage" class="text-base md:text-lg font-bold text-gray-500 mt-4"></div>
             </div>
 
-            <div class="bg-gray-50 rounded-2xl p-6 mb-8 inline-block w-full max-w-sm text-left border border-gray-100">
+            <div class="bg-gray-50 rounded-2xl p-6 mb-8 inline-block w-full max-w-sm text-left border border-gray-100 shadow-inner">
                 <div class="flex justify-between mb-2 text-sm">
-                    <span class="text-gray-500">ミスタイプ回数</span>
+                    <span class="text-gray-500 font-bold">Accuracy</span>
                     <span id="statMiss" class="font-bold text-gray-800">0 回</span>
                 </div>
                 <div class="flex justify-between text-sm">
-                    <span class="text-gray-500">ヒント使用回数</span>
+                    <span class="text-gray-500 font-bold">Assistance</span>
                     <span id="statHint" class="font-bold text-gray-800">0 回</span>
                 </div>
                 <hr class="my-3 border-gray-200">
                 <div class="flex justify-between items-center">
-                    <span class="font-bold text-gray-500 uppercase tracking-widest text-[10px]">Final Score</span>
+                    <span class="font-bold text-gray-400 uppercase tracking-widest text-[10px]">Proficiency Score</span>
                     <span id="statScore" class="font-black text-blue-600 text-3xl">100</span>
                 </div>
             </div>
@@ -203,27 +222,27 @@
             <div class="flex flex-col gap-3 items-center">
                 <div class="flex gap-4 justify-center w-full">
                     <button type="button" onclick="game.start(game.currentLevel)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-2xl transition shadow-lg flex-1 transform active:scale-95">
-                        もう一度
+                        リトライ
                     </button>
                     <button type="button" onclick="game.showReview()" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-2xl transition shadow-lg flex-1 transform active:scale-95">
-                        問題を振り返る
+                        復習する
                     </button>
                 </div>
                 <button type="button" onclick="game.init()" class="text-gray-400 font-bold py-2 px-8 rounded-2xl transition hover:text-gray-600">
-                    レベル選択へ
+                    レベル選択へ戻る
                 </button>
             </div>
         </div>
 
         <!-- 4. 振り返り画面 -->
         <div id="screenReview" class="hidden p-6 md:p-8 fade-in flex flex-col h-[550px]">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">今回の問題</h2>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">今回の課題</h2>
             <div id="reviewList" class="flex-grow overflow-y-auto space-y-4 pr-2 mb-6 review-list">
             </div>
             <div class="flex flex-col gap-3 items-center mt-auto">
                 <div class="flex gap-4 justify-center w-full">
                     <button type="button" onclick="game.start(game.currentLevel)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-2xl transition shadow-lg flex-1 transform active:scale-95">
-                        もう一度
+                        もう一度挑戦
                     </button>
                     <button type="button" onclick="game.showScreen('screenResult')" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 px-8 rounded-2xl transition flex-1 transform active:scale-95">
                         結果に戻る
@@ -236,714 +255,6 @@
         </div>
     </div>
 
-    <script>
-        const MASTER_DATA = {
-            junior: [
-                { en: "I have a pen.", ja: "私はペンを持っています。" },
-                { en: "The apple is red.", ja: "そのリンゴは赤いです。" },
-                { en: "Where is the station?", ja: "駅はどこですか？" },
-                { en: "It's a beautiful day.", ja: "素晴らしい天気ですね。" },
-                { en: "Nice to meet you.", ja: "はじめまして。" },
-                { en: "How are you doing today?", ja: "今日の調子はどうですか？" },
-                { en: "I like playing soccer.", ja: "私はサッカーをすることが好きです。" },
-                { en: "She is a doctor.", ja: "彼女は医者です。" },
-                { en: "We went to the park.", ja: "私たちは公園に行きました。" },
-                { en: "They are my friends.", ja: "彼らは私の友達です。" },
-                { en: "What time is it now?", ja: "今何時ですか？" },
-                { en: "I am hungry.", ja: "お腹が空きました。" },
-                { en: "He speaks English well.", ja: "彼は上手に英語を話します。" },
-                { en: "Do you like coffee?", ja: "コーヒーは好きですか？" },
-                { en: "This is my favorite book.", ja: "これは私のお気に入りの本です。" },
-                { en: "Open the window please.", ja: "窓を開けてください。" },
-                { en: "I live in Tokyo.", ja: "私は東京に住んでいます。" },
-                { en: "Wait a minute.", ja: "ちょっと待ってください。" },
-                { en: "See you tomorrow.", ja: "また明日会いましょう。" },
-                { en: "Good morning.", ja: "おはようございます。" },
-                { en: "Take care of yourself.", ja: "お大事に。" },
-                { en: "I'm sorry for being late.", ja: "遅れてすみません。" },
-                { en: "No problem at all.", ja: "全く問題ありません。" },
-                { en: "Let's go home.", ja: "家に帰りましょう。" },
-                { en: "The sky is blue.", ja: "空は青いです。" },
-                { en: "My mother is a good cook.", ja: "私の母は料理が上手です。" },
-                { en: "I want to travel abroad.", ja: "海外旅行に行きたいです。" },
-                { en: "It's getting cold.", ja: "寒くなってきました。" },
-                { en: "Can you help me?", ja: "手伝ってくれますか？" },
-                { en: "Where do you live?", ja: "どこに住んでいますか？" },
-                { en: "I forgot my umbrella.", ja: "傘を忘れました。" },
-                { en: "The movie was interesting.", ja: "その映画は面白かったです。" },
-                { en: "I have two sisters.", ja: "私には2人の姉妹がいます。" },
-                { en: "He is very kind.", ja: "彼はとても親切です。" },
-                { en: "I'm busy right now.", ja: "今、忙しいです。" },
-                { en: "What is your name?", ja: "名前は何ですか？" },
-                { en: "I like listening to music.", ja: "音楽を聴くのが好きです。" },
-                { en: "It's raining outside.", ja: "外は雨が降っています。" },
-                { en: "Stay at home.", ja: "家にいてください。" },
-                { en: "I don't know.", ja: "わかりません。" },
-                { en: "That's a good idea.", ja: "それはいい考えですね。" },
-                { en: "I'm looking for a job.", ja: "仕事を探しています。" },
-                { en: "Happy birthday to you.", ja: "誕生日おめでとう。" },
-                { en: "Keep it up.", ja: "その調子で頑張って。" },
-                { en: "Never give up.", ja: "決してあきらめないで。" },
-                { en: "I'm so proud of you.", ja: "あなたのことをとても誇りに思います。" },
-                { en: "You can do it.", ja: "あなたならできます。" },
-                { en: "Everything will be fine.", ja: "すべて上手くいきますよ。" },
-                { en: "Just a moment.", ja: "少々お待ちください。" },
-                { en: "Believe in yourself.", ja: "自分を信じて。" },
-                { en: "Time flies so fast.", ja: "時間は経つのが早い。" },
-                { en: "Better late than never.", ja: "遅れてもやらないよりはましだ。" },
-                { en: "It depends on you.", ja: "あなた次第です。" },
-                { en: "I agree with you.", ja: "同意します。" },
-                { en: "Excuse me.", ja: "すみません。" },
-                { en: "Thank you very much.", ja: "ありがとうございます。" },
-                { en: "You're welcome.", ja: "どういたしまして。" },
-                { en: "Long time no see.", ja: "お久しぶりです。" },
-                { en: "Tell me the truth.", ja: "本当のことを教えて。" },
-                { en: "I'm tired today.", ja: "疲れました。" },
-                { en: "Lunch was delicious.", ja: "昼食は美味しかったです。" },
-                { en: "What happened?", ja: "何が起きたのですか？" },
-                { en: "Don't worry about it.", ja: "心配しないで。" },
-                { en: "Be careful.", ja: "気をつけて。" },
-                { en: "I'm happy to hear that.", ja: "それを聞いて嬉しいです。" },
-                { en: "Is anyone here?", ja: "誰かいますか？" },
-                { en: "Where are you going?", ja: "どこへ行くのですか？" },
-                { en: "I need some help.", ja: "助けが必要です。" },
-                { en: "That sounds great.", ja: "それは素晴らしいですね。" },
-                { en: "Can I ask a question?", ja: "質問してもいいですか？" },
-                { en: "Whose bag is this?", ja: "これは誰のバッグですか？" },
-                { en: "I can't believe it.", ja: "信じられません。" },
-                { en: "Spring has come.", ja: "春が来ました。" },
-                { en: "I'll be back soon.", ja: "すぐに戻ります。" },
-                { en: "Call me later.", ja: "あとで電話して。" },
-                { en: "Good luck with that.", ja: "頑張ってね。" },
-                { en: "I'm lost.", ja: "道に迷いました。" },
-                { en: "How much is this?", ja: "これはいくらですか？" },
-                { en: "It's too expensive.", ja: "高すぎます。" },
-                { en: "I'll take it.", ja: "これにします。" },
-                { en: "Do you have a reservation?", ja: "予約はありますか？" },
-                { en: "Check please.", ja: "お会計をお願いします。" },
-                { en: "Follow me.", ja: "ついてきてください。" },
-                { en: "Sit down please.", ja: "座ってください。" },
-                { en: "Stand up.", ja: "立ってください。" },
-                { en: "Turn left at the corner.", ja: "角を左に曲がってください。" },
-                { en: "Go straight ahead.", ja: "真っ直ぐ進んでください。" },
-                { en: "It's near here.", ja: "この近くです。" },
-                { en: "I'm looking forward to it.", ja: "楽しみにしています。" },
-                { en: "Have a nice trip.", ja: "良い旅を。" },
-                { en: "Dream big.", ja: "大きな夢を持って。" },
-                { en: "Work hard.", ja: "一生懸命働いて。" },
-                { en: "Smile more.", ja: "もっと笑って。" },
-                { en: "Eat well.", ja: "よく食べて。" },
-                { en: "Sleep enough.", ja: "十分睡眠をとって。" },
-                { en: "Read books every day.", ja: "毎日本を読んで。" },
-                { en: "Learn something new.", ja: "何か新しいことを学んで。" },
-                { en: "Peace of mind.", ja: "心の平和。" },
-                { en: "Health is wealth.", ja: "健康は富なり。" },
-                { en: "Life is a journey.", ja: "人生は旅だ。" }
-            ],
-            senior: [
-                { en: "I appreciate your kind assistance.", ja: "ご親切な援助に感謝します。" },
-                { en: "The environmental issue is becoming serious.", ja: "環境問題は深刻になりつつあります。" },
-                { en: "I should have taken his advice.", ja: "彼の助言を聞いておくべきでした。" },
-                { en: "It is important to protect our nature.", ja: "自然を守ることは重要です。" },
-                { en: "Technology has changed our lives significantly.", ja: "技術は私たちの生活を著しく変えました。" },
-                { en: "Could you explain the details again?", ja: "詳細をもう一度説明していただけますか？" },
-                { en: "I am interested in learning new languages.", ja: "新しい言語を学ぶことに興味があります。" },
-                { en: "She is one of the most famous writers.", ja: "彼女は最も有名な作家の一人です。" },
-                { en: "The government should take immediate action.", ja: "政府は即座に行動を起こすべきです。" },
-                { en: "Experience is the best teacher in life.", ja: "経験は人生において最高の教師です。" },
-                { en: "I wonder why he didn't attend the meeting.", ja: "なぜ彼が欠席したのか不思議です。" },
-                { en: "It is difficult to predict the future.", ja: "未来を予測することは困難です。" },
-                { en: "He promised to come but he didn't show up.", ja: "約束したのに彼は現れませんでした。" },
-                { en: "I am looking forward to seeing you soon.", ja: "お会いできるのを楽しみにしています。" },
-                { en: "The movie reminded me of my childhood.", ja: "その映画で子供時代を思い出しました。" },
-                { en: "Success depends on your continuous effort.", ja: "成功は継続的な努力にかかっています。" },
-                { en: "I'll let you know the result tomorrow.", ja: "明日、結果を知らせます。" },
-                { en: "We need to find a solution to this problem.", ja: "この問題の解決策を見つける必要があります。" },
-                { en: "Learning from mistakes is very important.", ja: "失敗から学ぶことは非常に重要です。" },
-                { en: "I found it easy to solve the puzzle.", ja: "パズルを解くのは簡単だとわかりました。" },
-                { en: "He has been living here for ten years.", ja: "彼はここに10年間住んでいます。" },
-                { en: "I want to know what happened last night.", ja: "昨夜何が起きたのか知りたいです。" },
-                { en: "Please keep in mind what I said.", ja: "私が言ったことを覚えておいてください。" },
-                { en: "The information is available on the website.", ja: "情報はウェブサイトで入手可能です。" },
-                { en: "I cannot afford to buy such an expensive car.", ja: "そんな高い車を買う余裕はありません。" },
-                { en: "They discussed the plan for the next project.", ja: "彼らは次の計画について議論しました。" },
-                { en: "I feel like going for a walk.", ja: "散歩に行きたい気分です。" },
-                { en: "The station is within walking distance.", ja: "駅は徒歩圏内にあります。" },
-                { en: "I managed to finish the report on time.", ja: "なんとか時間通りに終えました。" },
-                { en: "Thank you for your cooperation.", ja: "ご協力ありがとうございます。" },
-                { en: "He is capable of handling complex tasks.", ja: "彼は複雑な仕事をこなす能力があります。" },
-                { en: "I am surprised at the sudden news.", ja: "突然の知らせに驚いています。" },
-                { en: "Could you do me a huge favor?", ja: "大きな頼みを聞いていただけますか？" },
-                { en: "I'm not used to speaking in public.", ja: "人前で話すことには慣れていません。" },
-                { en: "The weather forecast says it will rain.", ja: "予報では雨が降ると言っています。" },
-                { en: "I have no idea what to do next.", ja: "次に何をすべきか全くわかりません。" },
-                { en: "Education plays a key role in society.", ja: "教育は社会において重要な役割を果たします。" },
-                { en: "I am proud of my country's culture.", ja: "自国の文化を誇りに思っています。" },
-                { en: "We should respect each other's opinions.", ja: "お互いの意見を尊重すべきです。" },
-                { en: "The population of the city is increasing.", ja: "その都市の人口は増加しています。" },
-                { en: "I have a lot of things to deal with.", ja: "対処すべきことがたくさんあります。" },
-                { en: "He is responsible for the mistake.", ja: "彼にその間違いの責任があります。" },
-                { en: "I am disappointed with the final result.", ja: "最終的な結果に失望しています。" },
-                { en: "Nature provides us with many resources.", ja: "自然は多くの資源を提供してくれます。" },
-                { en: "I'll wait until you are ready.", ja: "準備ができるまで待ちます。" },
-                { en: "The building was constructed long ago.", ja: "その建物はずっと前に建てられました。" },
-                { en: "I'm sure that you will succeed.", ja: "きっと成功すると確信しています。" },
-                { en: "He is known for his great leadership.", ja: "彼は優れた指導力で知られています。" },
-                { en: "I have to prepare for the examination.", ja: "試験の準備をしなければなりません。" },
-                { en: "We had a lot of fun at the party.", ja: "パーティーでとても楽しみました。" },
-                { en: "I feel comfortable in this room.", ja: "この部屋は居心地が良いです。" },
-                { en: "The lecture was quite informative.", ja: "講義は非常にためになりました。" },
-                { en: "I am confused by the complicated rules.", ja: "複雑な規則に混乱しています。" },
-                { en: "Health is more valuable than money.", ja: "健康はお金よりも価値があります。" },
-                { en: "I'm afraid I cannot attend the party.", ja: "残念ながら出席できません。" },
-                { en: "He recommended this book to me.", ja: "彼はこの本を私に薦めました。" },
-                { en: "I am satisfied with my current life.", ja: "現在の生活に満足しています。" },
-                { en: "The news spread quickly through the town.", ja: "ニュースは町中にすぐに広まりました。" },
-                { en: "I want to improve my communication skills.", ja: "能力を向上させたいです。" },
-                { en: "The restaurant is famous for its pizza.", ja: "その店はピザで有名です。" },
-                { en: "I'm exhausted after a long day of work.", ja: "仕事のあとで疲れ果ていています。" },
-                { en: "She decided to study abroad next year.", ja: "来年、留学することに決めました。" },
-                { en: "I am excited about the upcoming trip.", ja: "今度の旅行を楽しみにしています。" },
-                { en: "He apologized for his rude behavior.", ja: "彼は失礼な振る舞いを謝罪しました。" },
-                { en: "The result was different from what I expected.", ja: "結果は期待とは違いました。" },
-                { en: "I am confident in my ability.", ja: "自分の能力に自信があります。" },
-                { en: "The museum is open to the public.", ja: "博物館は一般に公開されています。" },
-                { en: "I'm grateful for your support.", ja: "あなたのサポートに感謝しています。" },
-                { en: "He is talented in many ways.", ja: "彼は多方面で才能があります。" },
-                { en: "I am curious about the secret.", ja: "その秘密に興味があります。" },
-                { en: "The plan was approved by the committee.", ja: "計画は委員会で承認されました。" },
-                { en: "I want to achieve my goals.", ja: "目標を達成したいです。" },
-                { en: "The view from the top is breathtaking.", ja: "山頂からの景色は最高です。" },
-                { en: "I'm worried about the global warming.", ja: "地球温暖化を心配しています。" },
-                { en: "He escaped from the danger.", ja: "彼は危険から逃れました。" },
-                { en: "I am determined to pass the test.", ja: "合格すると決心しています。" },
-                { en: "The project requires a lot of patience.", ja: "忍耐が必要です。" },
-                { en: "I'm impressed by your performance.", ja: "パフォーマンスに感動しました。" },
-                { en: "He suggested going to the beach.", ja: "ビーチに行くことを提案しました。" },
-                { en: "I am busy preparing for the festival.", ja: "準備で忙しいです。" },
-                { en: "The situation is quite complicated.", ja: "状況はかなり複雑です。" },
-                { en: "I'm addicted to this mobile game.", ja: "このゲームに夢中です。" },
-                { en: "She reminded me to call my mother.", ja: "母に電話するよう思い出させました。" },
-                { en: "I am aware of the risk.", ja: "リスクは承知しています。" },
-                { en: "The company is growing rapidly.", ja: "会社は急速に成長しています。" },
-                { en: "I'm involved in the local community.", ja: "地域に関わっています。" },
-                { en: "He is generous to everyone.", ja: "彼は誰に対しても寛大です。" },
-                { en: "I am addicted to drinking coffee.", ja: "習慣になっています。" },
-                { en: "The story has a happy ending.", ja: "物語はハッピーエンドです。" },
-                { en: "I'm used to working under pressure.", ja: "プレッシャーには慣れています。" },
-                { en: "The economy is showing signs of recovery.", ja: "経済は回復の兆しを見せています。" },
-                { en: "I want to expand my business.", ja: "ビジネスを拡大したいです。" },
-                { en: "She is dedicated to her work.", ja: "彼女は仕事に献身的です。" },
-                { en: "I am influenced by my favorite teacher.", ja: "先生に影響を受けています。" },
-                { en: "The truth will be revealed eventually.", ja: "真実はいつか明らかになります。" },
-                { en: "I'm concerned about your health.", ja: "健康を心配しています。" },
-                { en: "He is honest and reliable.", ja: "彼は正直で信頼できます。" },
-                { en: "I am fascinated by the universe.", ja: "私は宇宙に魅了されています。" },
-                { en: "The discovery changed history.", ja: "発見は歴史を変えました。" },
-                { en: "Life is full of surprises.", ja: "人生は驚きに満ちている。" },
-                { en: "Keep your eyes on the prize.", ja: "目標から目をそらさないで。" }
-            ],
-            toeic: [
-                { en: "The annual report is available on the website.", ja: "年次報告書はウェブサイトで入手可能です。" },
-                { en: "Please confirm your attendance by Friday.", ja: "金曜日までに出席の確認をお願いします。" },
-                { en: "The meeting has been rescheduled for next Monday.", ja: "会議は来週の月曜日に延期されました。" },
-                { en: "We offer a wide range of financial services.", ja: "当社は幅広い金融サービスを提供しています。" },
-                { en: "I'm writing to follow up on our conversation.", ja: "先日の話し合いの件でご連絡いたしました。" },
-                { en: "The marketing team is developing a new campaign.", ja: "マーケティングチームは新しいキャンペーンを開発中です。" },
-                { en: "Could you please provide us with a quote?", ja: "見積もりをいただけますでしょうか？" },
-                { en: "The presentation will begin in ten minutes.", ja: "プレゼンテーションは10分後に始まります。" },
-                { en: "I would like to apply for the position.", ja: "その役職に応募したいと考えています。" },
-                { en: "The deadline for the project is approaching.", ja: "プロジェクトの締め切りが近づいています。" },
-                { en: "We need to reduce our operating costs.", ja: "私たちは運営コストを削減する必要があります。" },
-                { en: "The product received positive reviews from customers.", ja: "その製品は顧客から好意的なレビューを受けました。" },
-                { en: "Thank you for your prompt response.", ja: "迅速なご対応ありがとうございます。" },
-                { en: "The branch office is located in the city center.", ja: "支店は市の中心部に位置しています。" },
-                { en: "He was promoted to sales manager last month.", ja: "彼は先月、営業マネージャーに昇進しました。" },
-                { en: "Our company is expanding into the Asian market.", ja: "当社はアジア市場へ進出しています。" },
-                { en: "Please make sure to sign the contract.", ja: "必ず契約書に署名してください。" },
-                { en: "We are committed to providing high quality service.", ja: "当社は高品質なサービスの提供に努めています。" },
-                { en: "The flight was delayed due to bad weather.", ja: "悪天候のためフライトが遅れました。" },
-                { en: "I have attached the document for your review.", ja: "ご確認用に資料を添付いたしました。" },
-                { en: "The workshop will be held in the main conference room.", ja: "ワークショップはメイン会議室で開催されます。" },
-                { en: "We are looking for a highly motivated candidate.", ja: "意欲の高い候補者を探しています。" },
-                { en: "Our inventory level is currently very low.", ja: "現在の在庫レベルは非常に低いです。" },
-                { en: "The CEO announced a new strategic plan.", ja: "CEOは新しい戦略計画を発表しました。" },
-                { en: "Please notify us if there are any changes.", ja: "変更がある場合はお知らせください。" },
-                { en: "The merger will take place early next year.", ja: "合併は来年初めに行われます。" },
-                { en: "We have decided to outsource the project.", ja: "プロジェクトを外部委託することに決めました。" },
-                { en: "I look forward to collaborating with you.", ja: "あなたと協力できるのを楽しみにしています。" },
-                { en: "The training session is mandatory for all staff.", ja: "研修会は全スタッフ必須です。" },
-                { en: "We offer a competitive salary and benefits package.", ja: "当社は競争力のある給与と福利厚生を提供します。" },
-                { en: "The technician is repairing the copier.", ja: "技術者がコピー機を修理しています。" },
-                { en: "I'd like to check out of my room now.", ja: "今、チェックアウトしたいのですが。" },
-                { en: "The lobby is undergoing renovation.", ja: "ロビーは改装工事中です。" },
-                { en: "Please fill out the application form.", ja: "申込書に記入してください。" },
-                { en: "We are conducting a survey on customer satisfaction.", ja: "顧客満足度に関する調査を行っています。" },
-                { en: "The keynote speaker will arrive shortly.", ja: "基調講演者が間もなく到着します。" },
-                { en: "Please keep your receipt for reimbursement.", ja: "払い戻しのために領収書を保管してください。" },
-                { en: "The project was completed ahead of schedule.", ja: "プロジェクトは予定より早く完了しました。" },
-                { en: "We are currently hiring for several positions.", ja: "現在、いくつかの職種で採用を行っています。" },
-                { en: "Please read the instructions carefully.", ja: "説明書をよく読んでください。" },
-                { en: "The office will be closed for the holiday.", ja: "祝日のためオフィスは閉鎖されます。" },
-                { en: "We need to address this issue immediately.", ja: "この問題にすぐに対処する必要があります。" },
-                { en: "The committee will review the proposals.", ja: "委員会が提案書を審査します。" },
-                { en: "I would like to suggest an alternative plan.", ja: "代替案を提案したいと思います。" },
-                { en: "The equipment is under warranty.", ja: "その設備は保証期間内です。" },
-                { en: "Our sales have increased by twenty percent.", ja: "当社の売上は20パーセント増加しました。" },
-                { en: "Please submit your expenses by the end of the month.", ja: "経費は月末までに提出してください。" },
-                { en: "The company was founded in nineteen ninety.", ja: "その会社は1990年に設立されました。" },
-                { en: "I'm sorry, he is currently in a meeting.", ja: "申し訳ありませんが、彼は現在会議中です。" },
-                { en: "We need to update our software system.", ja: "ソフトウェアシステムを更新する必要があります。" },
-                { en: "The board of directors approved the budget.", ja: "取締役会が予算を承認しました。" },
-                { en: "Please let me know your availability.", ja: "ご都合のよろしい時間を教えてください。" },
-                { en: "We are dedicated to environmental sustainability.", ja: "当社は環境の持続可能性に専念しています。" },
-                { en: "The shipment is expected to arrive tomorrow.", ja: "荷物は明日到着する予定です。" },
-                { en: "I'd like to make a formal complaint.", ja: "正式な苦情を申し立てたいと思います。" },
-                { en: "The factory tour will last for two hours.", ja: "工場見学は2時間行われます。" },
-                { en: "We have reached an agreement with the union.", ja: "組合と合意に達しました。" },
-                { en: "Please refer to the manual for troubleshooting.", ja: "故障かなと思ったらマニュアルを参照してください。" },
-                { en: "The company is a leader in the tech industry.", ja: "その会社はテック業界のリーダーです。" },
-                { en: "I appreciate your patience during the delay.", ja: "遅延の間、お待ちいただき感謝します。" },
-                { en: "We have to cancel the reservation.", ja: "予約をキャンセルしなければなりません。" },
-                { en: "The consultant provided valuable advice.", ja: "コンサルタントは貴重な助言をくれました。" },
-                { en: "Please park your car in the designated area.", ja: "指定された場所に車を停めてください。" },
-                { en: "We are proud to sponsor this event.", ja: "このイベントを後援できることを誇りに思います。" },
-                { en: "The store is having a grand opening sale.", ja: "その店は開店記念セールを行っています。" },
-                { en: "Please double check the figures in the spreadsheet.", ja: "スプレッドシートの数字を再確認してください。" },
-                { en: "We value your feedback on our performance.", ja: "私たちのパフォーマンスへのフィードバックを大切にします。" },
-                { en: "The security system requires a password.", ja: "セキュリティシステムにはパスワードが必要です。" },
-                { en: "I'm responsible for coordinating the event.", ja: "私はイベントの調整を担当しています。" },
-                { en: "The company offers a generous pension plan.", ja: "その会社は手厚い年金制度を提供しています。" },
-                { en: "Please turn off all electronics during takeoff.", ja: "離陸時はすべての電子機器の電源を切ってください。" },
-                { en: "We are seeking a candidate with strong leadership skills.", ja: "強い指導力を持つ候補者を求めています。" },
-                { en: "The local economy is starting to improve.", ja: "地域経済が改善し始めています。" },
-                { en: "Please wait in the reception area.", ja: "受付エリアでお待ちください。" },
-                { en: "We provide technical support twenty-four hours a day.", ja: "24時間体制でテクニカルサポートを提供しています。" },
-                { en: "The job requires frequent travel overseas.", ja: "その仕事は頻繁な海外出張を必要とします。" },
-                { en: "Please use the side entrance after six p.m.", ja: "午後6時以降は横の入り口を使用してください。" },
-                { en: "We are happy to announce our new partnership.", ja: "新しいパートナーシップを発表できて嬉しく思います。" },
-                { en: "The contract is subject to legal review.", ja: "契約書は法的審査の対象となります。" },
-                { en: "Please return the keys to the front desk.", ja: "鍵をフロントデスクに返却してください。" },
-                { en: "We are focusing on improving efficiency.", ja: "私たちは効率の向上に注力しています。" },
-                { en: "The price includes tax and shipping.", ja: "価格には税金と送料が含まれています。" },
-                { en: "Please do not hesitate to contact us.", ja: "お気軽にお問い合わせください。" },
-                { en: "We aim to deliver the best customer experience.", ja: "最高の顧客体験を提供することを目指しています。" },
-                { en: "The meeting will take place via video conference.", ja: "会議はビデオ会議を通じて行われます。" },
-                { en: "Please keep your belongings with you at all times.", ja: "手荷物は常に身につけておいてください。" },
-                { en: "We are launching a new product next month.", ja: "来月、新製品を発売します。" },
-                { en: "The office is easily accessible by public transport.", ja: "オフィスは公共交通機関で簡単にアクセスできます。" },
-                { en: "Please review the safety guidelines.", ja: "安全ガイドラインを確認してください。" },
-                { en: "We are dedicated to innovation and creativity.", ja: "革新と創造性に専念しています。" },
-                { en: "The results were better than we anticipated.", ja: "結果は予想していたよりも良かったです。" },
-                { en: "Please follow the instructions on the screen.", ja: "画面上の指示に従ってください。" },
-                { en: "We provide comprehensive insurance coverage.", ja: "当社は包括的な保険補償を提供します。" },
-                { en: "The auditorium has a seating capacity of five hundred.", ja: "その講堂の収容人数は500人です。" },
-                { en: "Please note that the schedule is subject to change.", ja: "スケジュールは変更される場合がありますのでご注意ください。" },
-                { en: "We are looking for ways to expand our network.", ja: "ネットワークを拡大する方法を探しています。" },
-                { en: "The presentation was very well received.", ja: "プレゼンテーションは非常に好評でした。" },
-                { en: "Please sign up for the newsletter.", ja: "ニュースレターに登録してください。" },
-                { en: "We are committed to workplace diversity.", ja: "私たちは職場の多様性に努めています。" },
-                { en: "The project cost was within the budget.", ja: "プロジェクト費用は予算内でした。" }
-            ]
-        };
-
-        const ILLUSTS = {
-            S: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 15l-3-7 7 2 3-7 3 7 7-2-3 7H5zm14 2H5v2h14v-2z" fill="#EAB308"/></svg>`,
-            A: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="8" fill="#94A3B8"/><path d="M12 7l1.5 3h3.5l-2.5 2 1 3.5-3.5-2-3.5 2 1-3.5-2.5-2h3.5L12 7z" fill="#F8FAFC"/></svg>`,
-            B: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#3B82F6"/></svg>`,
-            C: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" fill="#94A3B8"/></svg>`
-        };
-
-        // --- オーディオ管理 ---
-        const audioManager = {
-            ctx: null,
-            englishVoice: null,
-
-            init() {
-                if (!this.ctx) {
-                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-                }
-                this.loadVoices();
-            },
-
-            loadVoices() {
-                const voices = window.speechSynthesis.getVoices();
-                this.englishVoice = voices.find(v => v.lang.startsWith('en-') && v.name.includes('Samantha')) || 
-                                    voices.find(v => v.lang.startsWith('en-'));
-            },
-
-            unlockAudio() {
-                if (this.ctx && this.ctx.state === 'suspended') {
-                    this.ctx.resume();
-                }
-                const silentUttr = new SpeechSynthesisUtterance("");
-                silentUttr.volume = 0;
-                window.speechSynthesis.speak(silentUttr);
-            },
-
-            playPingPong() {
-                this.beep(660, 0.1);
-                setTimeout(() => this.beep(880, 0.2), 100);
-            },
-
-            playBuzz() {
-                if (!this.ctx) return;
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(120, this.ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(40, this.ctx.currentTime + 0.3);
-                gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.3);
-                osc.connect(gain); gain.connect(this.ctx.destination);
-                osc.start(); osc.stop(this.ctx.currentTime + 0.3);
-            },
-
-            beep(freq, duration) {
-                if (!this.ctx) return;
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-                gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
-                osc.connect(gain); gain.connect(this.ctx.destination);
-                osc.start(); osc.stop(this.ctx.currentTime + duration);
-            },
-
-            speak(text, lang = 'en-US', callback = null) {
-                window.speechSynthesis.cancel();
-                const uttr = new SpeechSynthesisUtterance(text);
-                if (lang.startsWith('en-')) {
-                    if (!this.englishVoice) this.loadVoices();
-                    if (this.englishVoice) uttr.voice = this.englishVoice;
-                }
-                uttr.lang = lang;
-                uttr.rate = 0.85;
-                if (callback) { uttr.onend = callback; }
-                window.speechSynthesis.speak(uttr);
-            },
-
-            replaySentence() {
-                if (game.status === 'playing') {
-                    this.speak(game.selectedQuestions[game.currentIndex].en, 'en-US');
-                }
-            },
-
-            startResultBGM(type) {
-                if (!this.ctx) return;
-                const now = this.ctx.currentTime;
-                const playChord = (freqs, startTime, duration, vol = 0.1) => {
-                    freqs.forEach(f => {
-                        const osc = this.ctx.createOscillator();
-                        const gain = this.ctx.createGain();
-                        osc.type = (type === 'happy') ? 'triangle' : 'sine';
-                        osc.frequency.setValueAtTime(f, startTime);
-                        gain.gain.setValueAtTime(0, startTime);
-                        gain.gain.linearRampToValueAtTime(vol, startTime + 0.05);
-                        gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
-                        osc.connect(gain); gain.connect(this.ctx.destination);
-                        osc.start(startTime); osc.stop(startTime + duration);
-                    });
-                };
-                if (type === 'happy') {
-                    [523, 659, 783, 1046].forEach((f, i) => playChord([f], now + i * 0.15, 0.8, 0.08));
-                } else {
-                    [392, 349, 329, 261].forEach((f, i) => playChord([f], now + i * 0.4, 1.2, 0.06));
-                }
-            }
-        };
-
-        window.speechSynthesis.onvoiceschanged = () => audioManager.loadVoices();
-
-        // --- メインゲームロジック ---
-        const game = {
-            status: 'start',
-            currentIndex: 0,
-            mistakes: 0,
-            hintsUsed: 0,
-            selectedQuestions: [],
-            currentSentenceData: [],
-            currentLevel: '',
-            questionMistakes: [0, 0, 0, 0, 0], 
-            questionHints: [0, 0, 0, 0, 0],
-            isProcessingInput: false, 
-
-            init() {
-                this.showScreen('screenStart');
-            },
-
-            start(level) {
-                this.showScreen('screenPlay');
-                audioManager.init();
-                audioManager.unlockAudio();
-
-                this.currentLevel = level;
-                this.currentIndex = 0;
-                this.mistakes = 0;
-                this.hintsUsed = 0;
-                this.questionMistakes = [0, 0, 0, 0, 0];
-                this.questionHints = [0, 0, 0, 0, 0];
-                
-                const pool = MASTER_DATA[level];
-                this.selectedQuestions = [...pool].sort(() => Math.random() - 0.5).slice(0, 5);
-                
-                this.status = 'playing';
-                this.updateUIForLevel();
-                this.loadQuestion();
-                
-                setTimeout(() => this.focusInput(), 100);
-            },
-
-            focusInput() {
-                const input = document.getElementById('hiddenInput');
-                input.focus();
-            },
-
-            updateUIForLevel() {
-                const badge = document.getElementById('levelBadge');
-                if (this.currentLevel === 'junior') {
-                    badge.innerText = '中学生レベル';
-                    badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-100 text-green-600 w-fit mb-1 uppercase tracking-tighter';
-                } else if (this.currentLevel === 'senior') {
-                    badge.innerText = '高校生レベル';
-                    badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-600 w-fit mb-1 uppercase tracking-tighter';
-                } else {
-                    badge.innerText = 'TOEIC対策';
-                    badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-600 w-fit mb-1 uppercase tracking-tighter';
-                }
-            },
-
-            loadQuestion() {
-                const q = this.selectedQuestions[this.currentIndex];
-                const sentence = q.en;
-                this.currentSentenceData = [];
-                const transArea = document.getElementById('translationDisplay');
-                transArea.style.opacity = '0';
-                transArea.innerText = q.ja;
-
-                let isWordStart = true;
-                for (let i = 0; i < sentence.length; i++) {
-                    const char = sentence[i];
-                    const isAlphabet = /[a-z]/i.test(char);
-                    if (isAlphabet) {
-                        if (isWordStart) {
-                            this.currentSentenceData.push({ char, isTarget: false, state: 'correct' });
-                            isWordStart = false;
-                        } else {
-                            this.currentSentenceData.push({ char, isTarget: true, state: 'hidden' });
-                        }
-                    } else {
-                        this.currentSentenceData.push({ char, isTarget: false, state: 'correct' });
-                        if (char === ' ') isWordStart = true;
-                    }
-                }
-                this.render();
-                document.getElementById('progressText').innerText = `${this.currentIndex + 1} / 5`;
-                setTimeout(() => audioManager.speak(sentence, 'en-US'), 600);
-            },
-
-            render() {
-                const container = document.getElementById('sentenceDisplay');
-                container.innerHTML = '';
-                const nextTargetIdx = this.currentSentenceData.findIndex(d => d.isTarget && d.state === 'hidden');
-                let currentWordWrapper = document.createElement('span');
-                currentWordWrapper.className = 'word-wrapper';
-                container.appendChild(currentWordWrapper);
-                
-                this.currentSentenceData.forEach((item, idx) => {
-                    if (item.char === ' ') {
-                        currentWordWrapper = document.createElement('span');
-                        currentWordWrapper.className = 'word-wrapper';
-                        container.appendChild(currentWordWrapper);
-                        return;
-                    }
-                    const span = document.createElement('span');
-                    span.className = 'char-slot';
-                    if (item.isTarget) {
-                        if (item.state === 'hidden') {
-                            span.innerText = ''; 
-                            span.classList.add('char-masked');
-                            if (idx === nextTargetIdx) span.classList.add('cursor');
-                        } else {
-                            span.innerText = item.char;
-                            span.classList.add(item.state === 'correct' ? 'char-correct' : 'char-hint');
-                        }
-                    } else {
-                        span.innerText = item.char;
-                        span.classList.add('char-static');
-                    }
-                    currentWordWrapper.appendChild(span);
-                });
-            },
-
-            handleInput(key) {
-                // PC・スマホ共通：ロック中、または非プレイ中は完全に無視
-                if (this.status !== 'playing' || this.isProcessingInput) return;
-                
-                const nextTargetIdx = this.currentSentenceData.findIndex(d => d.isTarget && d.state === 'hidden');
-                if (nextTargetIdx === -1) return;
-
-                // ロックを掛ける
-                this.isProcessingInput = true;
-
-                const targetChar = this.currentSentenceData[nextTargetIdx].char;
-                const lowerKey = key.toLowerCase();
-                const lowerTarget = targetChar.toLowerCase();
-
-                if (lowerKey === lowerTarget) {
-                    this.currentSentenceData[nextTargetIdx].state = 'correct';
-                    this.render();
-                    this.checkCompletion();
-                } else {
-                    // 表示済みの文字（単語の1文字目など）を入力した場合はカウントしない
-                    if (nextTargetIdx > 0) {
-                        const prevChar = this.currentSentenceData[nextTargetIdx - 1].char;
-                        if (lowerKey === prevChar.toLowerCase()) {
-                            this.isProcessingInput = false;
-                            return;
-                        }
-                    }
-                    this.mistakes++;
-                    this.questionMistakes[this.currentIndex]++;
-                    audioManager.playBuzz();
-                }
-
-                // デバウンス処理：一瞬待ってからロックを解除（連続文字・末尾バグ防止の肝）
-                setTimeout(() => { this.isProcessingInput = false; }, 50);
-            },
-
-            useHint() {
-                if (this.status !== 'playing') return;
-                const nextTargetIdx = this.currentSentenceData.findIndex(d => d.isTarget && d.state === 'hidden');
-                if (nextTargetIdx === -1) return;
-                this.hintsUsed++;
-                this.questionHints[this.currentIndex]++; 
-                this.currentSentenceData[nextTargetIdx].state = 'hint';
-                this.render();
-                this.checkCompletion();
-                this.focusInput();
-            },
-
-            checkCompletion() {
-                const isFinished = this.currentSentenceData.every(d => !d.isTarget || d.state !== 'hidden');
-                if (isFinished) {
-                    this.status = 'cleared';
-                    audioManager.playPingPong();
-                    this.showClearEffect();
-                    const transArea = document.getElementById('translationDisplay');
-                    transArea.style.opacity = '1';
-                    transArea.classList.remove('translate-y-2');
-                    transArea.classList.add('translate-y-0');
-                    setTimeout(() => this.nextQuestion(), 2000);
-                }
-            },
-
-            nextQuestion() {
-                this.currentIndex++;
-                if (this.currentIndex < 5) {
-                    this.status = 'playing';
-                    this.loadQuestion();
-                    this.focusInput();
-                } else {
-                    this.finishGame();
-                }
-            },
-
-            showClearEffect() {
-                const overlay = document.getElementById('successOverlay');
-                overlay.classList.add('show-overlay');
-                setTimeout(() => overlay.classList.remove('show-overlay'), 1000);
-            },
-
-            finishGame() {
-                this.status = 'result';
-                const score = Math.max(0, 100 - (this.mistakes * 2) - (this.hintsUsed * 5));
-                let rank = 'C', message = 'もう少し頑張りましょう！', bgmType = 'sad', colorClass = 'text-gray-400';
-                if (score >= 90) { rank = 'S'; message = 'Excellent! 完璧です！'; bgmType = 'happy'; colorClass = 'text-yellow-500'; } 
-                else if (score >= 70) { rank = 'A'; message = 'Great! かなり聞き取れています！'; bgmType = 'happy'; colorClass = 'text-green-500'; } 
-                else if (score >= 50) { rank = 'B'; message = 'Good! あと少しで完璧です。'; bgmType = 'sad'; colorClass = 'text-blue-500'; }
-
-                const label = document.getElementById('rankLabel');
-                label.innerText = `${rank}ランク`;
-                label.className = `font-black italic tracking-tighter transition-all duration-500 ${colorClass} text-5xl md:text-6xl`;
-                if (rank === 'S') label.classList.add('rank-bounce');
-                document.getElementById('rankIllustration').innerHTML = ILLUSTS[rank];
-                document.getElementById('rankMessage').innerText = message;
-                document.getElementById('statMiss').innerText = `${this.mistakes} 回`;
-                document.getElementById('statHint').innerText = `${this.hintsUsed} 回`;
-                document.getElementById('statScore').innerText = score;
-                
-                this.showScreen('screenResult');
-                audioManager.startResultBGM(bgmType);
-            },
-
-            showReview() {
-                const list = document.getElementById('reviewList');
-                list.innerHTML = '';
-                this.selectedQuestions.forEach((q, i) => {
-                    const mCount = this.questionMistakes[i];
-                    const hCount = this.questionHints[i];
-                    const mistakeColor = mCount > 0 ? 'text-red-500 border-red-100' : 'text-green-500 border-green-100';
-                    const hintColor = hCount > 0 ? 'text-red-500 border-red-100' : 'text-slate-400 border-slate-100';
-                    const item = document.createElement('div');
-                    item.className = 'bg-slate-50 border border-slate-200 p-4 rounded-xl flex justify-between items-center mb-2';
-                    item.innerHTML = `
-                        <div class="flex-grow">
-                            <div class="flex flex-wrap items-center gap-2 mb-1">
-                                <span class="text-[10px] text-white bg-slate-400 px-1.5 py-0.5 rounded font-bold uppercase">Q${i + 1}</span>
-                                <span class="text-[10px] font-bold ${mistakeColor} bg-white border px-2 py-0.5 rounded-full shadow-sm">ミス: ${mCount}回</span>
-                                <span class="text-[10px] font-bold ${hintColor} bg-white border px-2 py-0.5 rounded-full shadow-sm">ヒント: ${hCount}回</span>
-                            </div>
-                            <div class="text-lg font-bold text-gray-800 leading-tight mb-1">${q.en}</div>
-                            <div class="text-sm text-blue-500 font-bold">${q.ja}</div>
-                        </div>
-                        <button type="button" onclick="audioManager.speak('${q.en.replace(/'/g, "\\'")}', 'en-US')" class="ml-4 p-2 bg-white border border-slate-200 rounded-full text-blue-500 shadow-sm self-start mt-2 active:bg-blue-50">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H3a1 1 0 01-1-1V8a1 1 0 011-1h1.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.983 5.983 0 01-1.414 4.243 1 1 0 11-1.415-1.415A3.983 3.983 0 0013 10a3.983 3.983 0 00-1.071-2.757 1 1 0 010-1.415z" clip-rule="evenodd" /></svg>
-                        </button>
-                    `;
-                    list.appendChild(item);
-                });
-                this.showScreen('screenReview');
-            },
-
-            showScreen(id) {
-                ['screenStart', 'screenPlay', 'screenResult', 'screenReview'].forEach(s => {
-                    document.getElementById(s).classList.add('hidden');
-                });
-                document.getElementById(id).classList.remove('hidden');
-            }
-        };
-
-        // --- 入力リスナー：PC・スマホ共通化 ---
-        // 理由：PCでもhiddenInputにフォーカスがある場合、keydownとinputが両方飛ぶため、inputに一本化する
-        const hiddenInput = document.getElementById('hiddenInput');
-
-        hiddenInput.addEventListener('input', (e) => {
-            // e.data（入力された文字）を優先取得、なければvalueの末尾を参照
-            let char = e.data; 
-            if (!char && hiddenInput.value.length > 0) {
-                char = hiddenInput.value.slice(-1);
-            }
-            
-            if (char && char.length === 1 && /[a-zA-Z]/.test(char)) {
-                game.handleInput(char);
-            }
-            
-            // バッファを即時空にして、ブラウザの再送や連続入力を防ぐ
-            hiddenInput.value = '';
-        });
-
-        // PCでのファンクションキーやCtrl等の誤動作防止（文字入力はinputイベントで行うためここは最小限に）
-        window.addEventListener('keydown', (e) => {
-            // スペースキーがスタートボタンやスクロールを誘発しないようにする
-            if (e.key === ' ') e.preventDefault();
-        });
-
-        window.onload = () => {
-            game.init();
-            window.speechSynthesis.getVoices();
-        };
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
