@@ -496,6 +496,8 @@ const game = {
         const container = document.getElementById('sentenceDisplay');
         if (!container) return;
         container.innerHTML = '';
+        container.classList.toggle('sentence-long', this.currentSentenceData.length > 55);
+        container.classList.toggle('sentence-extra-long', this.currentSentenceData.length > 80);
         const nextTargetIdx = this.currentSentenceData.findIndex(d => d.isTarget && d.state === 'hidden');
         let currentWordWrapper = document.createElement('span');
         currentWordWrapper.className = 'word-wrapper';

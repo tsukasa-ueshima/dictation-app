@@ -27,6 +27,7 @@
         #sentenceDisplay {
             user-select: none;
             -webkit-user-select: none;
+            margin-block: auto;
         }
 
         .word-wrapper {
@@ -41,6 +42,35 @@
             text-align: center;
             margin: 0 1px;
             position: relative;
+        }
+
+        #sentenceDisplay.sentence-long {
+            font-size: 1.125rem;
+            line-height: 1.8;
+            gap-row: 0.75rem;
+        }
+
+        #sentenceDisplay.sentence-long .word-wrapper {
+            margin: 0 0.45rem;
+        }
+
+        #sentenceDisplay.sentence-long .char-slot {
+            width: 1rem;
+            margin: 0;
+        }
+
+        #sentenceDisplay.sentence-extra-long {
+            font-size: 1rem;
+            line-height: 1.7;
+            gap-row: 0.5rem;
+        }
+
+        #sentenceDisplay.sentence-extra-long .word-wrapper {
+            margin: 0 0.3rem;
+        }
+
+        #sentenceDisplay.sentence-extra-long .char-slot {
+            width: 0.9rem;
         }
 
         .char-masked {
@@ -181,7 +211,7 @@
                 </button>
             </div>
 
-            <div class="bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 md:p-8 mb-4 text-center flex-grow flex flex-col items-center justify-center gap-6 overflow-hidden">
+            <div class="bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 md:p-8 mb-4 text-center flex-grow flex flex-col items-center justify-start gap-6 overflow-y-auto">
                 <div id="sentenceDisplay" class="text-xl md:text-2xl mono leading-relaxed tracking-wider flex flex-wrap justify-center gap-y-4">
                 </div>
                 <div id="translationDisplay" class="opacity-0 transform translate-y-2 text-base md:text-lg font-bold text-blue-600 border-t border-slate-200 pt-6 w-full transition-all duration-300">
